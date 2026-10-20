@@ -1,0 +1,12 @@
+{
+  "name": "hallenplan",
+  "private": true,
+  "scripts": {
+    "check": "node scripts/check-data.js",
+    "test": "playwright test",
+    "build": "node scripts/build-single.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

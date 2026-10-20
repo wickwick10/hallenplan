@@ -1,0 +1,198 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"></head><body>
+<title>Handball Trainingsplaner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: Kopfzeile mit Hallenlinien, darunter Filterleiste; Planansicht als Seitenleiste (Stufe + Spielfeld) und Einheiten-Spalte */
+:root {
+  --bg: #eef2f5; --surface: #ffffff; --ink: #142233; --muted: #5a6a7b; --line: #d3dbe3;
+  --court: #1f5aa6; --court-soft: #dbe6f4; --hot: #d9541e; --hot-soft: #fbe6dc; --warn: #8a5a00; --warn-bg: #fff3d6;
+  --floor: #e7edf4; --zone: #c9d8ec;
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1722; --surface: #172231; --ink: #e6edf5; --muted: #95a5b8; --line: #2a394b;
+  --court: #6aa1e8; --court-soft: #1d3250; --hot: #f07a45; --hot-soft: #3a2218; --warn: #f3c66a; --warn-bg: #33290f;
+  --floor: #142030; --zone: #1e3352; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1722; --surface: #172231; --ink: #e6edf5; --muted: #95a5b8; --line: #2a394b;
+  --court: #6aa1e8; --court-soft: #1d3250; --hot: #f07a45; --hot-soft: #3a2218; --warn: #f3c66a; --warn-bg: #33290f;
+  --floor: #142030; --zone: #1e3352; color-scheme: dark }
+
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--f-body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); letter-spacing: .01em; text-wrap: balance; margin: 0; line-height: 1.1; }
+h2 { font-size: 1.9rem; } h3 { font-size: 1.25rem; }
+p { margin: 0; }
+.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: .88em; }
+.muted { color: var(--muted); font-weight: 600; font-size: .7em; }
+.eyebrow { text-transform: uppercase; letter-spacing: .09em; font-size: .72rem; font-weight: 700; color: var(--court); }
+
+.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+.top .wrap { padding-block: 20px 0; display: grid; gap: 14px; }
+.brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.brand h1 { font-size: 2.3rem; text-transform: uppercase; }
+.brand h1 span { color: var(--hot); }
+.brand p { color: var(--muted); max-width: 60ch; }
+.tabs { display: flex; gap: 4px; overflow-x: auto; }
+.tab { font: 700 1.05rem var(--f-display); text-transform: uppercase; letter-spacing: .05em; background: none; border: 0; color: var(--muted);
+  padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--hot); }
+.tab:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--court); outline-offset: 2px; }
+
+main .wrap { padding-block: 24px 48px; }
+.view { display: grid; gap: 20px; }
+
+#controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
+label.field { display: grid; gap: 4px; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+select, input[type="search"] { font: 1rem var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 8px; min-width: 0; width: 100%; }
+input[type="range"] { accent-color: var(--hot); width: 100%; }
+.range-row { display: flex; gap: 10px; align-items: center; }
+
+.plan-grid { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .plan-grid { grid-template-columns: minmax(0, 1fr); } }
+#plan-summary { display: grid; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
+#plan-summary h3 { margin-top: 6px; }
+.sys-line { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { font-size: .8rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--bg); border: 1px solid var(--line); }
+.chip-def { background: var(--hot-soft); border-color: transparent; color: var(--hot); }
+.chip-att { background: var(--court-soft); border-color: transparent; color: var(--court); }
+.court { width: 100%; height: auto; display: block; border-radius: 4px; }
+.c-floor { fill: var(--floor); } .c-zone { fill: var(--zone); }
+.c-line { fill: none; stroke: var(--court); stroke-width: 1.2; } .c-dash { stroke-dasharray: 4 3; }
+.c-goal { fill: var(--ink); }
+.c-def { fill: var(--hot); stroke: var(--surface); stroke-width: 1.2; }
+.c-att { fill: var(--surface); stroke: var(--court); stroke-width: 1.8; }
+.c-tw { fill: var(--ink); }
+.c-lbl { font: 6px var(--f-body); fill: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: .82rem; color: var(--muted); }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: -8px; }
+.dot-def { background: var(--hot); } .dot-att { border: 2px solid var(--court); } .dot-tw { background: var(--ink); }
+.warn { background: var(--warn-bg); color: var(--warn); padding: 8px 10px; border-radius: 4px; font-size: .9rem; }
+.note { font-size: .9rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+ul.ticks { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+ul.ticks li { padding-left: 18px; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 8px; height: 2px; background: var(--hot); }
+.mix { display: grid; gap: 6px; }
+.mix-row { display: grid; grid-template-columns: minmax(0, 9.5rem) 1fr 3.2rem; gap: 8px; align-items: center; font-size: .9rem; }
+.bar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--court); }
+.mix-row .num { text-align: right; }
+
+#plan-units { display: grid; gap: 16px; }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.unit header { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.unit header .eyebrow { grid-column: 1 / -1; }
+.unit header .total { align-self: end; color: var(--muted); }
+.blocks { list-style: none; margin: 0; padding: 0; }
+.block { display: grid; grid-template-columns: 3rem minmax(0, 1fr) auto; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--line); align-items: start; }
+.block:first-child { border-top: 0; }
+.block .t { color: var(--hot); font-weight: 500; padding-top: 2px; }
+.b-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+.ex-link { font: 700 1.05rem var(--f-body); color: var(--ink); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.ex-link:hover { text-decoration-color: var(--hot); }
+.adapt { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+.adapt b { color: var(--court); }
+.swap { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 4px; width: 34px; height: 34px; cursor: pointer; font-size: 1rem; }
+.swap:hover { border-color: var(--hot); color: var(--hot); }
+
+.lib-tools { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+@media (max-width: 640px) { .lib-tools { grid-template-columns: minmax(0, 1fr); } }
+.check { display: flex; gap: 6px; align-items: center; font-size: .9rem; }
+#lib-count { color: var(--muted); font-size: .9rem; }
+#lib-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.ex-card { width: 100%; height: 100%; text-align: left; display: grid; gap: 4px; align-content: start; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; color: var(--ink); font: inherit; cursor: pointer; }
+.ex-card:hover { border-color: var(--court); }
+.ex-name { font: 700 1.25rem var(--f-display); }
+.ex-meta { font-size: .85rem; color: var(--muted); }
+.fit { color: var(--court); font-weight: 700; }
+.ex-goal { font-size: .92rem; }
+
+.sys-section { display: grid; gap: 12px; }
+.sys-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.sys-card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; align-content: start; }
+.sys-body { padding: 14px; display: grid; gap: 6px; }
+.kv { font-size: .92rem; }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; min-width: 820px; font-size: .92rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+thead th { font: 700 .78rem var(--f-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.intro { max-width: 70ch; color: var(--muted); }
+
+dialog { border: 0; border-radius: 8px; padding: 0; max-width: 640px; width: calc(100% - 32px); max-height: 88vh; background: var(--surface); color: var(--ink); }
+dialog::backdrop { background: rgba(10, 20, 35, .55); }
+.dlg-in { padding: 22px; display: grid; gap: 10px; }
+#ex-close { justify-self: end; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 6px 12px; cursor: pointer; color: var(--ink); font: 600 .9rem var(--f-body); }
+#ex-body { display: grid; gap: 10px; }
+#ex-body h3 { margin-top: 6px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 0; }
+.facts div { background: var(--bg); border-radius: 4px; padding: 8px; }
+.facts dt { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+.facts dd { margin: 0; font-size: .92rem; }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.adapt-box { background: var(--court-soft); padding: 10px 12px; border-radius: 4px; }
+details summary { cursor: pointer; font-weight: 700; color: var(--court); }
+details .kv { margin-top: 6px; }
+.empty { color: var(--muted); }
+footer { color: var(--muted); font-size: .85rem; }
+footer .wrap { padding-block: 0 32px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="brand"><h1>Hallen<span>plan</span></h1><p>Trainingspläne für die Grundausbildung leistungsorientierter Handballteams, von den Minis bis zu den Aktiven, angepasst an dein Spielsystem.</p></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="plan" aria-selected="true">Trainingsplan</button>
+    <button class="tab" role="tab" data-tab="uebungen" aria-selected="false">Übungen</button>
+    <button class="tab" role="tab" data-tab="systeme" aria-selected="false">Spielsysteme</button>
+    <button class="tab" role="tab" data-tab="stufen" aria-selected="false">Altersstufen</button>
+  </nav>
+</div></header>
+
+<main><div class="wrap">
+  <section id="v-plan" class="view">
+    <form id="controls" onsubmit="return false">
+      <label class="field" for="f-stage">Altersstufe<select id="f-stage"></select></label>
+      <label class="field" for="f-level">Niveau<select id="f-level"></select></label>
+      <label class="field" for="f-def">Eigene Abwehr<select id="f-def"></select></label>
+      <label class="field" for="f-att">Eigener Angriff<select id="f-att"></select></label>
+      <label class="field" for="f-units">Einheiten pro Woche<span class="range-row"><input type="range" id="f-units" min="1" max="5" step="1"><output id="f-units-out" class="num"></output></span></label>
+    </form>
+    <div class="plan-grid">
+      <aside id="plan-summary"></aside>
+      <div id="plan-units"></div>
+    </div>
+  </section>
+
+  <section id="v-uebungen" class="view" hidden>
+    <div class="lib-tools">
+      <label class="field" for="lib-q">Suche<input type="search" id="lib-q" placeholder="z. B. Sprungwurf, Übergeben"></label>
+      <label class="field" for="lib-cat">Kategorie<select id="lib-cat"></select></label>
+      <label class="check" for="lib-age"><input type="checkbox" id="lib-age" checked> Nur gewählte Altersstufe</label>
+    </div>
+    <p id="lib-count"></p>
+    <ul id="lib-list"></ul>
+  </section>
+
+  <section id="v-systeme" class="view" hidden>
+    <p class="intro">Jede Übung kennt Varianten für die einzelnen Systeme. Wählst du im Trainingsplan dein Abwehr- und Angriffssystem, zeigt der Plan automatisch die passende Variante.</p>
+    <div class="sys-section"><h2>Abwehrsysteme</h2><div class="sys-grid" id="sys-def"></div></div>
+    <div class="sys-section"><h2>Angriffssysteme</h2><div class="sys-grid" id="sys-att"></div></div>
+  </section>
+
+  <section id="v-stufen" class="view" hidden>
+    <p class="intro">Die Stufen orientieren sich an der Rahmentrainingskonzeption des Deutschen Handballbundes. Welche Abwehrsysteme erlaubt sind, regelt die Spielordnung deines Landesverbands.</p>
+    <div class="table-wrap" id="stage-table"></div>
+  </section>
+</div></main>
+
+<footer><div class="wrap"><p>Prototyp · Inhalte sind Empfehlungen und ersetzen keine Trainerlizenz. Deine Auswahl wird nur in diesem Browser gespeichert.</p></div></footer>
+
+<dialog id="ex-dialog"><div class="dlg-in"><button id="ex-close" type="button">Schließen</button><div id="ex-body"></div></div></dialog>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body></html>
