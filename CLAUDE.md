@@ -24,3 +24,6 @@ Website für Handballtrainer und -spieler: Trainingspläne nach Altersstufe, Niv
 - PR-Beschreibung mit Vorher/Nachher und Screenshots (Handy und Desktop).
 - Fachfragen, die nur ein Trainer beantworten kann, im PR unter „Frage an den Trainer“ sammeln.
 - Issue-Labels: `bereit` (darf umgesetzt werden), `rolle:leistung`, `rolle:breite`, `rolle:spieler`, `inhalt`, `fehler`, `praxis` (Feedback aus der Halle, hat Vorrang).
+
+## Veröffentlichung
+- Die Website wird noch nicht veröffentlicht. Keinen Pages-, Hosting- oder Deploy-Workflow anlegen, bis Joel das ausdrücklich freigibt.
