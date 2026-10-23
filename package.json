@@ -2,7 +2,7 @@
   "name": "hallenplan",
   "private": true,
   "scripts": {
-    "check": "node scripts/check-data.js",
+    "check": "node scripts/check-data.js && node scripts/check-plans.js",
     "test": "playwright test",
     "build": "node scripts/build-single.js"
   },

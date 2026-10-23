@@ -46,7 +46,7 @@ function buildPlan() {
       const offset = (u + (state.swaps[key] || 0)) % Math.max(list.length, 1);
       const ex = list[offset] || list[0];
       if (ex) used.add(ex.id);
-      return { key, label, min: Math.round(total * share / 5) * 5 || 5, ex, alt: list.length > 1 };
+      return { key, label, cats, min: Math.round(total * share / 5) * 5 || 5, ex, alt: list.length > 1 };
     });
     units.push({ titel: tpl.titel, blocks, total: blocks.reduce((t, b) => t + b.min, 0) });
   }
