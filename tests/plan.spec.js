@@ -36,3 +36,32 @@ test("kein horizontales Scrollen und alle Tabs erreichbar", async ({ page }) => 
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}-${tab}.png`, fullPage: true });
   }
 });
+
+test("Skizze: Schritte vor und zurück, Abspielen, kein seitliches Scrollen", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", e => errors.push(e.message));
+  await page.goto(url);
+  await page.click('.tab[data-tab="uebungen"]');
+  await page.click('.ex-card[data-ex="dreieckpass"]');
+  const sk = page.locator("#ex-dialog .sk");
+  await expect(sk.locator(".sk-live")).toBeVisible();
+  await expect(sk.locator(".sk-text")).toContainText("1/4");
+  await expect(sk.locator('[data-sk-act="prev"]')).toBeDisabled();
+  await sk.locator('[data-sk-act="next"]').click();
+  await expect(sk.locator(".sk-text")).toContainText("2/4");
+  await expect(sk.locator(".sk-live .sk-layer .sk-pass")).toHaveCount(1);
+  await sk.locator('[data-sk-act="prev"]').click();
+  await expect(sk.locator(".sk-text")).toContainText("1/4");
+  await sk.locator('[data-sk-act="play"]').click();
+  await expect(sk.locator('[data-sk-act="play"]')).toContainText("Pause");
+  await expect(sk.locator(".sk-text")).toContainText("2/4", { timeout: 4000 });
+  await sk.locator('[data-sk-act="play"]').click();
+  await sk.locator('[data-sk-act="next"]').click();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+  const box = await sk.boundingBox(), dlg = await page.locator("#ex-dialog").boundingBox();
+  expect(box.x + box.width).toBeLessThanOrEqual(dlg.x + dlg.width + 1);
+  await page.waitForTimeout(1000);
+  await page.locator("#ex-dialog").screenshot({ path: `test-results/screens/${test.info().project.name}-skizze.png` });
+  expect(errors).toEqual([]);
+});
