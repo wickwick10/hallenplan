@@ -65,3 +65,18 @@ test("Skizze: Schritte vor und zurück, Abspielen, kein seitliches Scrollen", as
   await page.locator("#ex-dialog").screenshot({ path: `test-results/screens/${test.info().project.name}-skizze.png` });
   expect(errors).toEqual([]);
 });
+
+test("Pilot-Skizzen: 6:0, 5:1 und 3:2:1 im Tab Systeme", async ({ page }) => {
+  await page.goto(url);
+  await page.click('.tab[data-tab="systeme"]');
+  const sketches = page.locator("#sys-def .sk");
+  await expect(sketches).toHaveCount(3);
+  const first = sketches.first();
+  await first.scrollIntoViewIfNeeded();
+  await first.locator('[data-sk-act="next"]').click();
+  await expect(first.locator(".sk-text")).toContainText("2/3");
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+  await page.waitForTimeout(1000);
+  await page.locator("#sys-def").screenshot({ path: `test-results/screens/${test.info().project.name}-pilot.png` });
+});

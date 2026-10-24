@@ -57,9 +57,10 @@ function checkSketch(tag, sk) {
   });
 }
 for (const e of EX) if (e.skizze) checkSketch(e.id, e.skizze);
+for (const [k, d] of Object.entries(DEFENSES)) if (d.skizze) checkSketch(`Abwehr ${k}`, d.skizze);
 
 // Abdeckung: wie viele Übungen haben eine eigene Variante je System und Stufe
-console.log("Übungen:", EX.length, "· mit Skizze:", EX.filter(e => e.skizze).length);
+console.log("Übungen:", EX.length, "· mit Skizze:", EX.filter(e => e.skizze).length, "· Abwehrsysteme mit Skizze:", Object.values(DEFENSES).filter(d => d.skizze).length);
 const rows = [];
 STAGES.forEach((st, i) => {
   const inStage = EX.filter(e => i >= e.ages[0] && i <= e.ages[1]);

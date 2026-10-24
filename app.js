@@ -279,7 +279,7 @@ function renderLibrary() {
 
 function renderSystems() {
   const card = (k, s, isDef) => `<article class="sys-card">
-    ${isDef ? court(k, null, { bare: true }) : court(null, k, { bare: true })}
+    ${s.skizze ? sketch(s.skizze) : isDef ? court(k, null, { bare: true }) : court(null, k, { bare: true })}
     <div class="sys-body">
       <p class="eyebrow">${isDef ? "Abwehr · " + esc(s.typ) : "Angriff"}</p>
       <h3>${esc(s.name)}</h3>
