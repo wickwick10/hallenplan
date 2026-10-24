@@ -19,8 +19,48 @@ for (const e of EX) {
   if (!Array.isArray(e.ablauf) || !e.ablauf.length) errors.push(`${tag}: ablauf leer`);
   if (!Array.isArray(e.coaching) || !e.coaching.length) errors.push(`${tag}: coaching leer`);
 }
+// Skizzen: Feld, Spieler, mindestens 3 Schritte, gültige Pfeile und Koordinaten im Feld
+const FIELDS = { halb: [20, 20], ganz: [40, 20], klein: [12, 20], frei: [14, 12] };
+const ROLES = ["att", "def", "tw", "tr"], ARROWS = ["pass", "lauf", "prellen", "sperre", "wurf"];
+const MAT = ["huetchen", "stange", "matte", "kasten", "reifen"];
+function checkSketch(tag, sk) {
+  const err = m => errors.push(`${tag}: Skizze ${m}`);
+  const F = FIELDS[sk.feld];
+  if (!F) return err(`unbekanntes Feld ${sk.feld}`);
+  const inField = p => Array.isArray(p) && p.length === 2 && p[0] >= 0 && p[1] >= 0 && p[0] <= F[0] && p[1] <= F[1];
+  const ids = new Set();
+  for (const p of sk.spieler || []) {
+    if (!p.id || ids.has(p.id)) err(`Spieler-id fehlt oder doppelt (${p.id})`);
+    ids.add(p.id);
+    if (!ROLES.includes(p.rolle)) err(`unbekannte Rolle ${p.rolle}`);
+  }
+  if (!ids.size) err("ohne Spieler");
+  for (const m of sk.material || []) if (!MAT.includes(m.typ) || !inField([m.x, m.y])) err(`Material ungültig (${m.typ})`);
+  const steps = sk.schritte || [];
+  if (steps.length < 3) err(`hat ${steps.length} Schritte, nötig sind mindestens 3`);
+  const known = new Set();
+  steps.forEach((st, i) => {
+    const s = `Schritt ${i + 1}`;
+    for (const [id, p] of Object.entries(st.pos || {})) {
+      if (!ids.has(id)) err(`${s}: unbekannter Spieler ${id}`);
+      if (!inField(p)) err(`${s}: ${id} liegt außerhalb des Felds`);
+      known.add(id);
+    }
+    if (i === 0) for (const id of ids) if (!known.has(id)) err(`Schritt 1: Position für ${id} fehlt`);
+    if (!st.text) err(`${s}: Erklärung fehlt`);
+    const ref = p => typeof p === "string" ? ids.has(p) : inField(p);
+    if (st.ball !== undefined && !ref(st.ball)) err(`${s}: Ball ungültig`);
+    for (const a of st.pfeile || []) {
+      if (!ARROWS.includes(a.typ)) err(`${s}: unbekannter Pfeil ${a.typ}`);
+      if (!ref(a.von) || !ref(a.nach)) err(`${s}: Pfeil ${a.typ} mit ungültigem Start oder Ziel`);
+    }
+  });
+}
+for (const e of EX) if (e.skizze) checkSketch(e.id, e.skizze);
+for (const [k, d] of Object.entries(DEFENSES)) if (d.skizze) checkSketch(`Abwehr ${k}`, d.skizze);
+
 // Abdeckung: wie viele Übungen haben eine eigene Variante je System und Stufe
-console.log("Übungen:", EX.length);
+console.log("Übungen:", EX.length, "· mit Skizze:", EX.filter(e => e.skizze).length, "· Abwehrsysteme mit Skizze:", Object.values(DEFENSES).filter(d => d.skizze).length);
 const rows = [];
 STAGES.forEach((st, i) => {
   const inStage = EX.filter(e => i >= e.ages[0] && i <= e.ages[1]);
