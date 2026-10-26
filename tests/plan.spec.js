@@ -80,3 +80,21 @@ test("Pilot-Skizzen: 6:0, 5:1 und 3:2:1 im Tab Systeme", async ({ page }) => {
   await page.waitForTimeout(1000);
   await page.locator("#sys-def").screenshot({ path: `test-results/screens/${test.info().project.name}-pilot.png` });
 });
+
+test("Übungsliste: Altersangabe ohne „S-Jugend“ (#10)", async ({ page }) => {
+  await page.goto(url);
+  await page.click('.tab[data-tab="uebungen"]');
+  const text = await page.locator("#lib-list").innerText();
+  expect(text).not.toContain("S-Jugend");
+  await expect(page.locator('.ex-card[data-ex="medball"] .ex-meta')).toContainText("D-Jugend bis Aktive");
+});
+
+test("Handy: alle Tabs ohne Wischen sichtbar (#11)", async ({ page }) => {
+  await page.goto(url);
+  const nav = await page.locator(".tabs").boundingBox();
+  for (const tab of await page.$$(".tab")) {
+    const b = await tab.boundingBox();
+    expect(b.x).toBeGreaterThanOrEqual(nav.x - 1);
+    expect(b.x + b.width, `Tab ${await tab.innerText()} ragt über die Leiste hinaus`).toBeLessThanOrEqual(nav.x + nav.width + 1);
+  }
+});

@@ -262,6 +262,9 @@ function renderPlan() {
     </article>`).join("");
 }
 
+// Kurzname für Listen: „D-Jugend“, bei den Aktiven ohne „-Jugend“
+const stageShort = i => STAGES[i].key === "S" ? "Aktive" : STAGES[i].key + "-Jugend";
+
 function renderLibrary() {
   const q = ($("#lib-q").value || "").toLowerCase(), cat = $("#lib-cat").value, ageOnly = $("#lib-age").checked;
   const list = EX.filter(e => (!cat || e.cat === cat) && (!ageOnly || (state.stage >= e.ages[0] && state.stage <= e.ages[1])) &&
@@ -272,7 +275,7 @@ function renderLibrary() {
     return `<li class="lib-item"><button class="ex-card" data-ex="${e.id}">
       <span class="b-label">${esc(CATS[e.cat])}</span>
       <span class="ex-name">${esc(e.name)}</span>
-      <span class="ex-meta"><span class="num">${e.min}′</span> · ${esc(STAGES[e.ages[0]].key)}–${esc(STAGES[e.ages[1]].key)}-Jugend${ad.length ? ` · <span class="fit">an dein System angepasst</span>` : ""}</span>
+      <span class="ex-meta"><span class="num">${e.min}′</span> · ${esc(stageShort(e.ages[0]))} bis ${esc(stageShort(e.ages[1]))}${ad.length ? ` · <span class="fit">an dein System angepasst</span>` : ""}</span>
       <span class="ex-goal">${esc(e.ziel)}</span>
     </button></li>`; }).join("") || `<li class="empty">Keine Übung passt zu diesem Filter.</li>`;
 }
