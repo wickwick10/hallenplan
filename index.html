@@ -107,6 +107,10 @@ input[type="range"] { accent-color: var(--hot); width: 100%; }
 .lg-prellen { height: 6px; vertical-align: 1px; background: radial-gradient(circle at 50% 120%, transparent 3px, var(--ink) 3px 4.4px, transparent 4.6px) 0 0 / 8px 6px; }
 .lg-wurf { height: 5px; vertical-align: 1px; background: none; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
 .lg-sperre { border-right: 2px solid var(--ink); height: 2px; box-shadow: 2px 0 0 0 var(--ink); }
+.scn { display: grid; gap: 8px; }
+.scn-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.scn-tabs button { font: 600 .85rem var(--f-body); padding: 8px 10px; min-height: 40px; border-radius: 99px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; text-align: left; }
+.scn-tabs button[aria-pressed="true"] { background: var(--court); border-color: var(--court); color: var(--surface); }
 .sk-print { display: none; }
 @media print {
   .sk-live, .sk figcaption { display: none; }

@@ -138,6 +138,22 @@ function sketch(sk) {
     <div class="sk-print">${sk.schritte.map((s, k) => `<div>${skSvg(sk, k, "court")}<p><b class="num">${k + 1}</b> ${esc(s.text)}</p></div>`).join("")}</div>
   </figure>`;
 }
+// Mehrere Szenarien je System: Auswahl über Knöpfe, darunter die Skizze
+const scnReg = [];
+function scenarios(list) {
+  const n = scnReg.push(list) - 1;
+  return `<div class="scn" data-scn="${n}">
+    <div class="scn-tabs">${list.map((sk, i) => `<button type="button" data-scn-i="${i}" aria-pressed="${!i}">${esc(sk.titel)}</button>`).join("")}</div>
+    <div class="scn-body">${sketch(list[0])}</div>
+  </div>`;
+}
+function scnPick(btn) {
+  const box = btn.closest(".scn"), i = +btn.dataset.scnI;
+  box.querySelectorAll(".sk").forEach(skStop);
+  box.querySelectorAll("[data-scn-i]").forEach(b => b.setAttribute("aria-pressed", b === btn));
+  box.querySelector(".scn-body").innerHTML = sketch(scnReg[+box.dataset.scn][i]);
+}
+
 function skGo(fig, i) {
   const sk = skReg[+fig.dataset.sk], last = sk.schritte.length - 1;
   i = Math.max(0, Math.min(last, i));
@@ -282,7 +298,7 @@ function renderLibrary() {
 
 function renderSystems() {
   const card = (k, s, isDef) => `<article class="sys-card">
-    ${s.skizze ? sketch(s.skizze) : isDef ? court(k, null, { bare: true }) : court(null, k, { bare: true })}
+    ${s.szenarien ? scenarios(s.szenarien) : s.skizze ? sketch(s.skizze) : isDef ? court(k, null, { bare: true }) : court(null, k, { bare: true })}
     <div class="sys-body">
       <p class="eyebrow">${isDef ? "Abwehr · " + esc(s.typ) : "Angriff"}</p>
       <h3>${esc(s.name)}</h3>
@@ -352,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
     save(); renderAll();
   });
   document.body.addEventListener("click", ev => {
+    const scn = ev.target.closest("[data-scn-i]"); if (scn) return scnPick(scn);
     const ska = ev.target.closest("[data-sk-act]"); if (ska) return skAction(ska.closest(".sk"), ska.dataset.skAct);
     const ex = ev.target.closest("[data-ex]"); if (ex) return openEx(ex.dataset.ex);
     const sw = ev.target.closest("[data-swap]");

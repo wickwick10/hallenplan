@@ -370,18 +370,46 @@ const UNIT_TEMPLATES = [
     { id: "rr", rolle: "att", kz: "RR" }, { id: "rf", rolle: "att", kz: "RF" }, { id: "k", rolle: "att", kz: "K" }, { id: "tw", rolle: "tw", kz: "TW" }];
   const attPos = { lf: [1.2, 3.2], rl: [4.5, 10.2], rm: [10, 11.2], rr: [15.5, 10.2], rf: [18.8, 3.2], tw: [10, 0.9] };
   const d = (id, kz) => ({ id, rolle: "def", kz });
-  DEFENSES["6:0"].skizze = { feld: "halb", titel: "6:0 gegen 3:3",
-    spieler: [...att, d("a1", "A"), d("h1", "H"), d("i1", "I"), d("i2", "I"), d("h2", "H"), d("a2", "A")],
-    schritte: [
-      { pos: { ...attPos, k: [10, 6.7], a1: [2.4, 4.2], h1: [5.3, 6.9], i1: [8.6, 7.1], i2: [11.4, 7.1], h2: [14.7, 6.9], a2: [17.6, 4.2] }, ball: "rm",
-        pfeile: [{ typ: "pass", von: "rm", nach: "rl" }, { typ: "lauf", von: "h1", nach: [5.4, 8.6] }],
-        text: "Grundstellung an der 6-m-Linie. Pass zu RL: der Halbverteidiger tritt Richtung Wurfarm heraus." },
-      { pos: { k: [9.1, 6.8], h1: [5.4, 8.6], i1: [7.6, 6.9], i2: [10.6, 7.0], h2: [13.6, 6.9], a2: [16.4, 5.4] }, ball: "rl",
-        pfeile: [{ typ: "pass", von: "rl", nach: "lf" }, { typ: "lauf", von: "h1", nach: [4.7, 6.8] }, { typ: "lauf", von: "a1", nach: [1.9, 4.9] }],
-        text: "Die Nachbarn sichern nach innen, die ganze Abwehr verschiebt zur Ballseite. Pass zu LF: Halb geht zurück, Aussen tritt heraus." },
-      { pos: { h1: [4.7, 6.8], a1: [1.9, 4.9] }, ball: "lf",
-        text: "Ball bei LF: Aussen stört den Flügel, Halb sichert innen. Bei Pass zurück im selben Rhythmus wieder zur Mitte." }
-    ] };
+  // 6:0 nach Joels Korrektur (27.10.2026): Flügel in der Ecke, Szenarien im Rückraum und am Kreis
+  const corner = { lf: [0.8, 1.2], rf: [19.2, 1.2], rl: [5, 10], rm: [10, 10.8], rr: [15, 10], tw: [10, 0.9] };
+  const d60 = { a1: [2.4, 3.6], h1: [5, 6.4], i1: [8.4, 6.9], i2: [11.6, 6.9], h2: [15, 6.4], a2: [17.6, 3.6] };
+  const sp60 = [...att, d("a1", "A"), d("h1", "H"), d("i1", "I"), d("i2", "I"), d("h2", "H"), d("a2", "A")];
+  DEFENSES["6:0"].szenarien = [
+    { feld: "halb", titel: "RM mit Ball, Kreis nahe (2 gegen 2 Mitte)", spieler: sp60,
+      schritte: [
+        { pos: { ...corner, ...d60, k: [10, 7.3] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "i2", nach: [11, 8.8] }],
+          text: "RM hat den Ball, der Kreis steht zwischen den Innen. Der Innen auf der Wurfarmseite tritt gegen RM heraus, der andere bleibt ballseitig am Kreis." },
+        { pos: { i2: [11, 8.8] }, ball: "rm",
+          pfeile: [{ typ: "sperre", von: "k", nach: [11.1, 8.1] }, { typ: "prellen", von: "rm", nach: [12.6, 9.4] }, { typ: "lauf", von: "h2", nach: [13.4, 8] }, { typ: "lauf", von: "i1", nach: [9.6, 7.1] }],
+          text: "Der Kreis sperrt den heraustretenden Innen, RM zieht an der Sperre vorbei. Der Halbe schliesst nach innen, der zweite Innen rückt nach." },
+        { pos: { k: [11.1, 8.1], rm: [12.6, 9.4], h2: [13.6, 8.2], i1: [9.4, 7.1], i2: [10.6, 7] }, ball: "rm",
+          text: "Übergeben: Der gesperrte Innen übernimmt den Kreis, der Halbe stellt RM, der zweite Innen sichert innen. Laut ansagen." }
+      ] },
+    { feld: "halb", titel: "RL mit Ball, Kreis zieht weg (Isolation)", spieler: sp60,
+      schritte: [
+        { pos: { ...corner, ...d60, k: [6.8, 7.5] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "k", nach: [13.3, 7.5] }, { typ: "lauf", von: "h1", nach: [5.6, 8.5] }],
+          text: "RL hat den Ball, der Kreis zieht auf die andere Seite weg: RL soll allein gegen H spielen. H tritt Richtung Wurfarm heraus." },
+        { pos: { k: [13.3, 7.5], h1: [5.6, 8.5] }, ball: "rl",
+          pfeile: [{ typ: "prellen", von: "rl", nach: [6.9, 9.1] }, { typ: "lauf", von: "i1", nach: [7.4, 7.1] }, { typ: "lauf", von: "a1", nach: [3.2, 5] }],
+          text: "Der Innen lässt den Kreis ziehen und übergibt ihn an den zweiten Innen. RL bricht nach innen durch: der Innen hilft, A hilft nach aussen." },
+        { pos: { rl: [6.9, 9.1], i1: [7.7, 7.7], a1: [3.2, 5], h1: [6, 8] }, ball: "rl",
+          text: "H und Innen schliessen den Durchbruch gemeinsam, A behält den Flügel in der Ecke im Blick, der zweite Innen hält den Kreis." }
+      ] },
+    { feld: "halb", titel: "Flügel läuft ein (zwei Kreisläufer)", spieler: sp60,
+      schritte: [
+        { pos: { ...corner, ...d60, k: [10, 7.3] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "lf", nach: [6.7, 7.4] }, { typ: "lauf", von: "a1", nach: [3.4, 5.2] }],
+          text: "LF läuft ein und wird zweiter Kreisläufer. A läuft nicht mit, sondern schiebt kompakt zu." },
+        { pos: { lf: [6.7, 7.4], a1: [3.4, 5.2] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "h1", nach: [5.6, 7.6] }, { typ: "pass", von: "rl", nach: "rm" }],
+          text: "H und Innen nehmen den zweiten Kreis zwischen sich. Variante: A bleibt in Manndeckung an RL." },
+        { pos: { h1: [5.6, 7.6] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "i2", nach: [11, 8.6] }],
+          text: "Spiel gegen zwei Kreisläufer: der Innen auf der Wurfarmseite tritt gegen RM heraus, der Nachbar hält den Kreis." }
+      ] }
+  ];
   DEFENSES["5:1"].skizze = { feld: "halb", titel: "5:1 gegen 3:3",
     spieler: [...att, d("a1", "A"), d("h1", "H"), d("i", "I"), d("h2", "H"), d("a2", "A"), d("v", "V")],
     schritte: [

@@ -98,3 +98,15 @@ test("Handy: alle Tabs ohne Wischen sichtbar (#11)", async ({ page }) => {
     expect(b.x + b.width, `Tab ${await tab.innerText()} ragt über die Leiste hinaus`).toBeLessThanOrEqual(nav.x + nav.width + 1);
   }
 });
+
+test("6:0: Szenarien umschalten", async ({ page }) => {
+  await page.goto(url);
+  await page.click('.tab[data-tab="systeme"]');
+  const box = page.locator("#sys-def .scn");
+  await expect(box.locator("[data-scn-i]")).toHaveCount(3);
+  await box.locator('[data-scn-i="1"]').click();
+  await expect(box.locator('[data-scn-i="1"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(box.locator(".sk-text")).toContainText("zieht auf die andere Seite");
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
