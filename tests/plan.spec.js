@@ -36,3 +36,78 @@ test("kein horizontales Scrollen und alle Tabs erreichbar", async ({ page }) => 
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}-${tab}.png`, fullPage: true });
   }
 });
+
+test("Skizze: Schritte vor und zurück, Abspielen, kein seitliches Scrollen", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", e => errors.push(e.message));
+  await page.goto(url);
+  await page.click('.tab[data-tab="uebungen"]');
+  await page.click('.ex-card[data-ex="dreieckpass"]');
+  const sk = page.locator("#ex-dialog .sk");
+  await expect(sk.locator(".sk-live")).toBeVisible();
+  await expect(sk.locator(".sk-text")).toContainText("1/4");
+  await expect(sk.locator('[data-sk-act="prev"]')).toBeDisabled();
+  await sk.locator('[data-sk-act="next"]').click();
+  await expect(sk.locator(".sk-text")).toContainText("2/4");
+  await expect(sk.locator(".sk-live .sk-layer .sk-pass")).toHaveCount(1);
+  await sk.locator('[data-sk-act="prev"]').click();
+  await expect(sk.locator(".sk-text")).toContainText("1/4");
+  await sk.locator('[data-sk-act="play"]').click();
+  await expect(sk.locator('[data-sk-act="play"]')).toContainText("Pause");
+  await expect(sk.locator(".sk-text")).toContainText("2/4", { timeout: 4000 });
+  await sk.locator('[data-sk-act="play"]').click();
+  await sk.locator('[data-sk-act="next"]').click();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+  const box = await sk.boundingBox(), dlg = await page.locator("#ex-dialog").boundingBox();
+  expect(box.x + box.width).toBeLessThanOrEqual(dlg.x + dlg.width + 1);
+  await page.waitForTimeout(1000);
+  await page.locator("#ex-dialog").screenshot({ path: `test-results/screens/${test.info().project.name}-skizze.png` });
+  expect(errors).toEqual([]);
+});
+
+test("Pilot-Skizzen: 6:0, 5:1 und 3:2:1 im Tab Systeme", async ({ page }) => {
+  await page.goto(url);
+  await page.click('.tab[data-tab="systeme"]');
+  const sketches = page.locator("#sys-def .sk");
+  await expect(sketches).toHaveCount(3);
+  const first = sketches.first();
+  await first.scrollIntoViewIfNeeded();
+  await first.locator('[data-sk-act="next"]').click();
+  await expect(first.locator(".sk-text")).toContainText("2/3");
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+  await page.waitForTimeout(1000);
+  await page.locator("#sys-def").screenshot({ path: `test-results/screens/${test.info().project.name}-pilot.png` });
+});
+
+test("Übungsliste: Altersangabe ohne „S-Jugend“ (#10)", async ({ page }) => {
+  await page.goto(url);
+  await page.click('.tab[data-tab="uebungen"]');
+  const text = await page.locator("#lib-list").innerText();
+  expect(text).not.toContain("S-Jugend");
+  await expect(page.locator('.ex-card[data-ex="medball"] .ex-meta')).toContainText("D-Jugend bis Aktive");
+});
+
+test("Handy: alle Tabs ohne Wischen sichtbar (#11)", async ({ page }) => {
+  await page.goto(url);
+  const nav = await page.locator(".tabs").boundingBox();
+  for (const tab of await page.$$(".tab")) {
+    const b = await tab.boundingBox();
+    expect(b.x).toBeGreaterThanOrEqual(nav.x - 1);
+    expect(b.x + b.width, `Tab ${await tab.innerText()} ragt über die Leiste hinaus`).toBeLessThanOrEqual(nav.x + nav.width + 1);
+  }
+});
+
+test("6:0 und 5:1: Szenarien umschalten", async ({ page }) => {
+  await page.goto(url);
+  await page.click('.tab[data-tab="systeme"]');
+  const box = page.locator("#sys-def .scn", { hasText: "2 gegen 2 Mitte" });
+  await expect(box.locator("[data-scn-i]")).toHaveCount(4);
+  await box.locator('[data-scn-i="1"]').click();
+  await expect(box.locator('[data-scn-i="1"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(box.locator(".sk-text")).toContainText("zieht auf die andere Seite");
+  await expect(page.locator("#sys-def .scn")).toHaveCount(2);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});

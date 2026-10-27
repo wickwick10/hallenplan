@@ -144,7 +144,24 @@ const EX = [
     ziel: "Pass und Fangen im Laufen, Schrittrhythmus.",
     ablauf: ["Drei Hütchen im Dreieck mit 7 m Abstand.", "Pass zum nächsten Hütchen und dem Ball hinterherlaufen.", "Nach zwei Minuten Richtung wechseln, zweiten Ball ins Spiel bringen."],
     coaching: ["Ball vor dem Körper fangen", "Pass in den Lauf, nicht auf den Mann", "Dreierrhythmus beim Pass"],
-    leichter: "Stand statt Lauf, ein Ball.", schwerer: "Nur Sprungpässe oder Pässe aus dem Handgelenk, drei Bälle." },
+    leichter: "Stand statt Lauf, ein Ball.", schwerer: "Nur Sprungpässe oder Pässe aus dem Handgelenk, drei Bälle.",
+    // Beispielskizze für die Skizzen-Grundlage (Bereich 2): Dreieck mit 7 m Seitenlänge, 4 Spieler, 1 Ball
+    skizze: { feld: "frei", titel: "Passen im Dreieck",
+      spieler: [{ id: "a", rolle: "att", kz: "1" }, { id: "b", rolle: "att", kz: "2" }, { id: "c", rolle: "att", kz: "3" }, { id: "d", rolle: "att", kz: "4" }],
+      material: [{ typ: "huetchen", x: 3.5, y: 9.5 }, { typ: "huetchen", x: 10.5, y: 9.5 }, { typ: "huetchen", x: 7, y: 3.44 }],
+      schritte: [
+        { pos: { a: [3.5, 8.6], b: [10.5, 8.6], c: [7, 2.5], d: [2.6, 10.6] }, ball: "a",
+          pfeile: [{ typ: "pass", von: "a", nach: "b" }, { typ: "lauf", von: [4.3, 9.5], nach: [10, 10.8] }],
+          text: "Spieler 1 passt zum nächsten Hütchen und läuft dem Ball hinterher." },
+        { pos: { a: [11.4, 10.6], d: [3.5, 8.6] }, ball: "b",
+          pfeile: [{ typ: "pass", von: "b", nach: "c" }, { typ: "lauf", von: [10.3, 7.7], nach: [8, 3.4] }],
+          text: "Spieler 2 fängt im Laufen vor dem Körper, passt weiter und folgt dem Ball." },
+        { pos: { a: [10.5, 8.6], b: [7.9, 1.6] }, ball: "c",
+          pfeile: [{ typ: "pass", von: "c", nach: "d" }, { typ: "lauf", von: [6.2, 3.4], nach: [3.4, 7.7] }],
+          text: "Spieler 3 spielt zurück zum Start. Wer passt, stellt sich hinten am nächsten Hütchen an." },
+        { pos: { c: [2.6, 10.6] }, ball: "d",
+          text: "Der Kreis beginnt von vorn. Nach zwei Minuten Richtung wechseln, dann zweiten Ball dazunehmen." }
+      ] } },
   { id: "sternpass", name: "Sternpassen mit Positionswechsel", cat: "pass", ages: [2,6], min: 12, spieler: "6–10", material: "2–3 Bälle, Hütchen auf den Positionen",
     ziel: "Passen auf den Spielpositionen mit Anlaufen in die Tiefe.",
     ablauf: ["Spieler stehen auf den Angriffspositionen.", "Jeder Pass erfolgt mit Anlaufen Richtung Tor, danach geht der Passgeber zurück.", "Nach jedem Pass wechselt der Passgeber die Position mit dem Empfänger."],
@@ -345,3 +362,159 @@ const UNIT_TEMPLATES = [
     ["Erwärmung", ["warm"], 0.15], ["Gegenstoß", ["gs"], 0.2], ["Abwehr im System", ["koopD", "d11"], 0.2],
     ["Rückzug", ["gs"], 0.15], ["Spiel", ["spiel"], 0.3] ] }
 ];
+
+// Pilot-Skizzen Bereich 2 (Grundmuster, Feinheiten wie Tiefe und Kreisläufer-Regel folgen in Bereich 12 mit Joel).
+// Koordinaten in Metern, Halbfeld 20 × 20 m, Tor oben. Angriff 3:3, Ball wandert von RM über RL zu LF.
+(() => {
+  const att = [{ id: "lf", rolle: "att", kz: "LF" }, { id: "rl", rolle: "att", kz: "RL" }, { id: "rm", rolle: "att", kz: "RM" },
+    { id: "rr", rolle: "att", kz: "RR" }, { id: "rf", rolle: "att", kz: "RF" }, { id: "k", rolle: "att", kz: "K" }, { id: "tw", rolle: "tw", kz: "TW" }];
+  const attPos = { lf: [1.2, 3.2], rl: [4.5, 10.2], rm: [10, 11.2], rr: [15.5, 10.2], rf: [18.8, 3.2], tw: [10, 0.9] };
+  const d = (id, kz) => ({ id, rolle: "def", kz });
+  // 6:0 nach Joels Korrektur (27.10.2026): Flügel in der Ecke, Szenarien im Rückraum und am Kreis
+  const corner = { lf: [0.8, 1.2], rf: [19.2, 1.2], rl: [5, 10], rm: [10, 10.8], rr: [15, 10], tw: [10, 0.9] };
+  const d60 = { a1: [2.4, 3.6], h1: [5, 6.4], i1: [8.4, 6.9], i2: [11.6, 6.9], h2: [15, 6.4], a2: [17.6, 3.6] };
+  // Nummerierung im 6:0 aus Sicht der Abwehr: 1 = rechter Aussenverteidiger (links im Bild, gegen LF), 6 = linker Aussenverteidiger (Joel, 27.10.2026)
+  const sp60 = [...att, d("a1", "1"), d("h1", "2"), d("i1", "3"), d("i2", "4"), d("h2", "5"), d("a2", "6")];
+  DEFENSES["6:0"].szenarien = [
+    { feld: "halb", titel: "RM mit Ball, Kreis nahe (2 gegen 2 Mitte)", spieler: sp60,
+      schritte: [
+        { pos: { ...corner, ...d60, k: [10, 7.3] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "i2", nach: [11, 8.8] }],
+          text: "RM hat den Ball, der Kreis steht zwischen 3 und 4. Der 4er auf der Wurfarmseite tritt gegen RM heraus, der 3er bleibt ballseitig am Kreis." },
+        { pos: { i2: [11, 8.8] }, ball: "rm",
+          pfeile: [{ typ: "sperre", von: "k", nach: [11.1, 8.1] }, { typ: "prellen", von: "rm", nach: [12.6, 9.4] }, { typ: "lauf", von: "h2", nach: [13.6, 8.2] }, { typ: "lauf", von: "i1", nach: [9.4, 7.1] }],
+          text: "Der Kreis sperrt den 4er, RM zieht an der Sperre vorbei. Der 5er schliesst nach innen, der 3er rückt nach." },
+        { pos: { k: [11.1, 8.1], rm: [12.6, 9.4], h2: [13.6, 8.2], i1: [9.4, 7.1], i2: [10.6, 7] }, ball: "rm",
+          text: "Übergeben: Der gesperrte 4er übernimmt den Kreis, der 5er stellt RM, der 3er sichert innen. Laut ansagen." }
+      ] },
+    { feld: "halb", titel: "RL mit Ball, Kreis zieht weg (Isolation)", spieler: sp60,
+      schritte: [
+        { pos: { ...corner, ...d60, k: [6.8, 7.5] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "k", nach: [13.3, 7.5] }, { typ: "lauf", von: "h1", nach: [5.6, 8.5] }],
+          text: "RL hat den Ball, der Kreis zieht auf die andere Seite weg: RL soll allein gegen den 2er spielen. Der 2er tritt Richtung Wurfarm heraus." },
+        { pos: { k: [13.3, 7.5], h1: [5.6, 8.5] }, ball: "rl",
+          pfeile: [{ typ: "prellen", von: "rl", nach: [6.9, 9.1] }, { typ: "lauf", von: "i1", nach: [7.4, 7.1] }, { typ: "lauf", von: "a1", nach: [3.2, 5] }],
+          text: "Der 3er lässt den Kreis ziehen und übergibt ihn an den 4er. RL bricht nach innen durch: der 3er hilft, der 1er hilft nach aussen." },
+        { pos: { rl: [6.9, 9.1], i1: [7.7, 7.7], a1: [3.2, 5], h1: [6, 8] }, ball: "rl",
+          text: "2er und 3er schliessen den Durchbruch gemeinsam, der 1er behält den Flügel in der Ecke im Blick, der 4er hält den Kreis." }
+      ] },
+    { feld: "halb", titel: "RR mit Ball, Kreis breit zwischen 5 und 6", spieler: sp60,
+      schritte: [
+        { pos: { ...corner, ...d60, k: [10, 7.3] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "k", nach: [16.5, 5.7] }, { typ: "pass", von: "rm", nach: "rr" }],
+          text: "Der Kreis läuft breit zwischen den 5er und den 6er, RM spielt zu RR." },
+        { pos: { k: [16.5, 5.7] }, ball: "rr",
+          pfeile: [{ typ: "lauf", von: "h2", nach: [15.5, 7] }, { typ: "lauf", von: "i2", nach: [13.6, 8.4] }, { typ: "lauf", von: "i1", nach: [10.6, 7.1] }],
+          text: "Der breite Kreis wird defensiv gelöst: der 5er bleibt tief und hält ihn, der 6er bleibt beim Flügel in der Ecke. Der 4er kommt zur Unterstützung gegen RR." },
+        { pos: { h2: [15.5, 7], i2: [13.6, 8.4], i1: [10.6, 7.1] }, ball: "rr",
+          text: "RR findet keine Lücke: 4er und 5er stehen kompakt, der Kreis ist zugestellt, der 3er rückt zur Ballseite nach." }
+      ] },
+    { feld: "halb", titel: "Flügel läuft ein (zwei Kreisläufer)", spieler: sp60,
+      schritte: [
+        { pos: { ...corner, ...d60, k: [10, 7.3] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "lf", nach: [6.7, 7.4] }, { typ: "lauf", von: "a1", nach: [3.4, 5.2] }],
+          text: "LF läuft ein und wird zweiter Kreisläufer. Der 1er läuft nicht mit, sondern schiebt kompakt zu." },
+        { pos: { lf: [6.7, 7.4], a1: [3.4, 5.2] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "h1", nach: [5.6, 7.6] }, { typ: "pass", von: "rl", nach: "rm" }],
+          text: "2er und 3er nehmen den zweiten Kreis zwischen sich. Variante: der 1er bleibt in Manndeckung an RL." },
+        { pos: { h1: [5.6, 7.6] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "i2", nach: [11, 8.6] }],
+          text: "Spiel gegen zwei Kreisläufer: der 4er auf der Wurfarmseite tritt gegen RM heraus, der 3er hält den Kreis." }
+      ] }
+  ];
+  // 5:1 nach Joel (27.10.2026): Vorgezogener = 1, Halbe = 2, Mitte = 3, Aussen ohne Zahl
+  const d51 = { a1: [2.4, 3.6], h1: [5, 6.4], m: [10, 6.5], h2: [15, 6.4], a2: [17.6, 3.6], v: [10, 9.3] };
+  const sp51 = [...att, d("a1", "A"), d("h1", "2"), d("m", "3"), d("h2", "2"), d("a2", "A"), d("v", "1")];
+  DEFENSES["5:1"].szenarien = [
+    { feld: "halb", titel: "RM mit Ball, Kreis kommt zum Vorgezogenen", spieler: sp51,
+      schritte: [
+        { pos: { ...corner, ...d51, k: [10, 7.4] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "k", nach: [11, 8.2] }],
+          text: "Der 1er stört RM. Der Kreis kommt hoch zum Vorgezogenen." },
+        { pos: { k: [11, 8.2] }, ball: "rm",
+          pfeile: [{ typ: "sperre", von: "k", nach: [10.5, 8.8] }, { typ: "prellen", von: "rm", nach: [13, 10.3] }, { typ: "lauf", von: "m", nach: [12.6, 8.6] }, { typ: "lauf", von: "v", nach: [10.6, 7.1] }],
+          text: "Der Kreis sperrt den 1er, RM zieht an der Sperre vorbei. Übergeben: der 3er tritt gegen RM heraus, der 1er fällt zurück." },
+        { pos: { rm: [13, 10.3], m: [12.6, 8.6], v: [10.6, 7.1] }, ball: "rm",
+          text: "Der 1er übernimmt den Kreis zwischen Kreis und Tor, der 3er stellt RM, die 2er schieben zur Mitte." }
+      ] },
+    { feld: "halb", titel: "RL mit Ball, Kreis zieht weg (Isolation)", spieler: sp51,
+      schritte: [
+        { pos: { ...corner, ...d51, k: [6.8, 7.5] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "k", nach: [12.8, 7.6] }, { typ: "lauf", von: "h1", nach: [5.6, 8.5] }],
+          text: "RL hat den Ball, der Kreis zieht auf die andere Seite weg. Der 2er tritt Richtung Wurfarm heraus." },
+        { pos: { k: [12.8, 7.6], h1: [5.6, 8.5] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "v", nach: [8.6, 10.3] }, { typ: "lauf", von: "m", nach: [7.8, 7.4] }, { typ: "lauf", von: "h2", nach: [14.3, 6.6] }, { typ: "lauf", von: "a1", nach: [3.2, 5] }, { typ: "prellen", von: "rl", nach: [6.9, 9.2] }],
+          text: "Der 1er stellt den Rückpass zu RM zu. Der 3er übergibt den Kreis an den 2er der anderen Seite und hilft beim Durchbruch nach innen." },
+        { pos: { rl: [6.9, 9.2], v: [8.6, 10.3], m: [7.8, 7.4], h2: [14.3, 6.6], a1: [3.2, 5], h1: [6, 8] }, ball: "rl",
+          text: "2er und 3er schliessen den Durchbruch, der Aussen hilft nach aussen und behält den Flügel, der 2er der anderen Seite hält den Kreis." }
+      ] },
+    { feld: "halb", titel: "RR mit Ball, Kreis breit zwischen 2 und Aussen", spieler: sp51,
+      schritte: [
+        { pos: { ...corner, ...d51, k: [10, 7.4] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "k", nach: [16.5, 5.7] }, { typ: "pass", von: "rm", nach: "rr" }],
+          text: "Der Kreis läuft breit zwischen den 2er und den Aussen, RM spielt zu RR." },
+        { pos: { k: [16.5, 5.7] }, ball: "rr",
+          pfeile: [{ typ: "lauf", von: "h2", nach: [15.5, 7] }, { typ: "lauf", von: "m", nach: [13.4, 7.9] }, { typ: "lauf", von: "v", nach: [12, 9.6] }],
+          text: "Defensiv lösen: der 2er bleibt tief und hält den Kreis, der Aussen bleibt beim Flügel, der 3er unterstützt gegen RR. Der 1er stellt den Pass zur Mitte zu." },
+        { pos: { h2: [15.5, 7], m: [13.4, 7.9], v: [12, 9.6] }, ball: "rr",
+          text: "RR ist gestellt, der Rückpass zur Mitte ist zu, der Kreis ist zugestellt." }
+      ] },
+    { feld: "halb", titel: "Flügel läuft ein (zwei Kreisläufer)", spieler: sp51,
+      schritte: [
+        { pos: { ...corner, ...d51, k: [10, 7.4] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "lf", nach: [6.9, 7.4] }, { typ: "lauf", von: "a1", nach: [3.4, 5.2] }],
+          text: "LF läuft ein und wird zweiter Kreisläufer. Der Aussen läuft nicht mit, sondern schiebt kompakt zu." },
+        { pos: { lf: [6.9, 7.4], a1: [3.4, 5.2] }, ball: "rl",
+          pfeile: [{ typ: "lauf", von: "h1", nach: [5.6, 7.6] }, { typ: "pass", von: "rl", nach: "rm" }],
+          text: "2er und 3er nehmen den zweiten Kreis zwischen sich. Variante: der Aussen geht in Manndeckung auf RL." },
+        { pos: { h1: [5.6, 7.6] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "v", nach: [10, 10] }],
+          text: "Gegen zwei Kreisläufer bleibt der 1er vorne gegen RM, der 3er hält den Kreis in der Mitte." }
+      ] }
+  ];
+  DEFENSES["3:2:1"].skizze = { feld: "halb", titel: "3:2:1 gegen 3:3",
+    spieler: [...att, d("a1", "A"), d("i", "I"), d("a2", "A"), d("h1", "H"), d("h2", "H"), d("v", "V")],
+    schritte: [
+      { pos: { ...attPos, k: [10, 7.4], a1: [2.4, 4.2], i: [10, 6.3], a2: [17.6, 4.2], h1: [6, 8.6], h2: [14, 8.6], v: [10, 10] }, ball: "rm",
+        pfeile: [{ typ: "pass", von: "rm", nach: "rl" }, { typ: "lauf", von: "h1", nach: [5.3, 9.1] }, { typ: "lauf", von: "v", nach: [8, 10.2] }, { typ: "lauf", von: "a1", nach: [3.2, 5.6] }],
+        text: "Drei hinten, zwei Halbe auf 8–9 m, der Vorgezogene vor RM. Pass zu RL: Halb greift RL an, der Vorgezogene stellt den Passweg zur Mitte zu, Aussen sichert nach innen." },
+      { pos: { h1: [5.3, 9.1], v: [8, 10.2], a1: [3.2, 5.6], h2: [12.8, 8.4], a2: [16.6, 5] }, ball: "rl",
+        pfeile: [{ typ: "pass", von: "rl", nach: "lf" }, { typ: "lauf", von: "a1", nach: [2, 4.7] }, { typ: "lauf", von: "h1", nach: [5.2, 7.6] }],
+        text: "Der hintere Mittelverteidiger behält den Kreisläufer. Pass zu LF: Aussen tritt heraus, Halb fällt zurück und sichert." },
+      { pos: { a1: [2, 4.7], h1: [5.2, 7.6] }, ball: "lf",
+        text: "Ball bei LF: Aussen stört den Flügel, Halb sichert den Raum innen. Der Raum zwischen den Linien bleibt die Schwachstelle." }
+    ] };
+
+  const ex = id => EX.find(e => e.id === id);
+  ex("heraustreten").skizze = { feld: "halb", titel: "Heraustreten und Sichern",
+    spieler: [{ id: "rl", rolle: "att", kz: "RL" }, { id: "rm", rolle: "att", kz: "RM" }, { id: "rr", rolle: "att", kz: "RR" }, d("v1", "1"), d("v2", "2")],
+    schritte: [
+      { pos: { rl: [5, 10.5], rm: [10, 11], rr: [15, 10.5], v1: [7.6, 6.8], v2: [12.4, 6.8] }, ball: "rl",
+        pfeile: [{ typ: "lauf", von: "v1", nach: [5.6, 9] }],
+        text: "Ball bei RL: Der ballnahe Verteidiger tritt Richtung Wurfarm heraus und ruft „Ich geh!“." },
+      { pos: { v1: [5.6, 9] },  ball: "rl",
+        pfeile: [{ typ: "pass", von: "rl", nach: "rm" }, { typ: "lauf", von: "v1", nach: [7.6, 6.8] }, { typ: "lauf", von: "v2", nach: [10.6, 8.8] }],
+        text: "Pass zur Mitte: Verteidiger 1 geht mit Blick zum Ball zurück, Verteidiger 2 tritt heraus." },
+      { pos: { v1: [7.6, 6.8], v2: [10.6, 8.8] }, ball: "rm",
+        pfeile: [{ typ: "pass", von: "rm", nach: "rr" }, { typ: "lauf", von: "v2", nach: [13.6, 9] }, { typ: "lauf", von: "v1", nach: [9.4, 6.8] }],
+        text: "Pass zu RR: Verteidiger 2 schiebt zum Ballführenden nach, Verteidiger 1 rückt ein und sichert innen." },
+      { pos: { v2: [13.6, 9], v1: [9.4, 6.8] }, ball: "rr",
+        text: "Ohne Ball zurück an die Linie, danach beginnt es von vorn." }
+    ] };
+  ex("eins_korridor").skizze = { feld: "frei", titel: "1:1 im Korridor",
+    spieler: [{ id: "a", rolle: "att", kz: "A" }, d("v", "V")],
+    material: [5, 10].flatMap(x => [1.5, 6, 10.5].map(y => ({ typ: "huetchen", x, y }))),
+    schritte: [
+      { pos: { a: [7.5, 10.8], v: [7.5, 5] }, ball: "a",
+        pfeile: [{ typ: "prellen", von: "a", nach: [7.5, 7.6] }],
+        text: "Der Angreifer prellt mit Tempo auf den Abwehrspieler zu." },
+      { pos: { a: [7.5, 7.6], v: [7.5, 5.6] }, ball: "a",
+        pfeile: [{ typ: "lauf", von: "a", nach: [6.1, 6.9] }],
+        text: "Täuschung: deutlicher Ausfallschritt zur einen Seite, der Abwehrspieler reagiert." },
+      { pos: { a: [6.1, 6.9], v: [6.6, 5.4] }, ball: "a",
+        pfeile: [{ typ: "prellen", von: "a", nach: [8.8, 2.6] }],
+        text: "Durchbruch auf die andere Seite, den Ball mit dem Körper schützen." },
+      { pos: { a: [8.8, 2.6], v: [7.1, 4.8] }, ball: "a",
+        text: "Ende des Korridors überquert. Nach drei Versuchen tauschen die Rollen." }
+    ] };
+})();
