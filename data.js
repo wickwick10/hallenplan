@@ -373,41 +373,53 @@ const UNIT_TEMPLATES = [
   // 6:0 nach Joels Korrektur (27.10.2026): Flügel in der Ecke, Szenarien im Rückraum und am Kreis
   const corner = { lf: [0.8, 1.2], rf: [19.2, 1.2], rl: [5, 10], rm: [10, 10.8], rr: [15, 10], tw: [10, 0.9] };
   const d60 = { a1: [2.4, 3.6], h1: [5, 6.4], i1: [8.4, 6.9], i2: [11.6, 6.9], h2: [15, 6.4], a2: [17.6, 3.6] };
-  const sp60 = [...att, d("a1", "A"), d("h1", "H"), d("i1", "I"), d("i2", "I"), d("h2", "H"), d("a2", "A")];
+  // Nummerierung im 6:0 von RA nach LA: 1 steht gegen RA (rechts im Bild), 6 gegen LA (Joel, 27.10.2026)
+  const sp60 = [...att, d("a2", "1"), d("h2", "2"), d("i2", "3"), d("i1", "4"), d("h1", "5"), d("a1", "6")];
   DEFENSES["6:0"].szenarien = [
     { feld: "halb", titel: "RM mit Ball, Kreis nahe (2 gegen 2 Mitte)", spieler: sp60,
       schritte: [
         { pos: { ...corner, ...d60, k: [10, 7.3] }, ball: "rm",
           pfeile: [{ typ: "lauf", von: "i2", nach: [11, 8.8] }],
-          text: "RM hat den Ball, der Kreis steht zwischen den Innen. Der Innen auf der Wurfarmseite tritt gegen RM heraus, der andere bleibt ballseitig am Kreis." },
+          text: "RM hat den Ball, der Kreis steht zwischen 3 und 4. Der 3er auf der Wurfarmseite tritt gegen RM heraus, der 4er bleibt ballseitig am Kreis." },
         { pos: { i2: [11, 8.8] }, ball: "rm",
-          pfeile: [{ typ: "sperre", von: "k", nach: [11.1, 8.1] }, { typ: "prellen", von: "rm", nach: [12.6, 9.4] }, { typ: "lauf", von: "h2", nach: [13.4, 8] }, { typ: "lauf", von: "i1", nach: [9.6, 7.1] }],
-          text: "Der Kreis sperrt den heraustretenden Innen, RM zieht an der Sperre vorbei. Der Halbe schliesst nach innen, der zweite Innen rückt nach." },
+          pfeile: [{ typ: "sperre", von: "k", nach: [11.1, 8.1] }, { typ: "prellen", von: "rm", nach: [12.6, 9.4] }, { typ: "lauf", von: "h2", nach: [13.6, 8.2] }, { typ: "lauf", von: "i1", nach: [9.4, 7.1] }],
+          text: "Der Kreis sperrt den 3er, RM zieht an der Sperre vorbei. Der 2er schliesst nach innen, der 4er rückt nach." },
         { pos: { k: [11.1, 8.1], rm: [12.6, 9.4], h2: [13.6, 8.2], i1: [9.4, 7.1], i2: [10.6, 7] }, ball: "rm",
-          text: "Übergeben: Der gesperrte Innen übernimmt den Kreis, der Halbe stellt RM, der zweite Innen sichert innen. Laut ansagen." }
+          text: "Übergeben: Der gesperrte 3er übernimmt den Kreis, der 2er stellt RM, der 4er sichert innen. Laut ansagen." }
       ] },
     { feld: "halb", titel: "RL mit Ball, Kreis zieht weg (Isolation)", spieler: sp60,
       schritte: [
         { pos: { ...corner, ...d60, k: [6.8, 7.5] }, ball: "rl",
           pfeile: [{ typ: "lauf", von: "k", nach: [13.3, 7.5] }, { typ: "lauf", von: "h1", nach: [5.6, 8.5] }],
-          text: "RL hat den Ball, der Kreis zieht auf die andere Seite weg: RL soll allein gegen H spielen. H tritt Richtung Wurfarm heraus." },
+          text: "RL hat den Ball, der Kreis zieht auf die andere Seite weg: RL soll allein gegen den 5er spielen. Der 5er tritt Richtung Wurfarm heraus." },
         { pos: { k: [13.3, 7.5], h1: [5.6, 8.5] }, ball: "rl",
           pfeile: [{ typ: "prellen", von: "rl", nach: [6.9, 9.1] }, { typ: "lauf", von: "i1", nach: [7.4, 7.1] }, { typ: "lauf", von: "a1", nach: [3.2, 5] }],
-          text: "Der Innen lässt den Kreis ziehen und übergibt ihn an den zweiten Innen. RL bricht nach innen durch: der Innen hilft, A hilft nach aussen." },
+          text: "Der 4er lässt den Kreis ziehen und übergibt ihn an den 3er. RL bricht nach innen durch: der 4er hilft, der 6er hilft nach aussen." },
         { pos: { rl: [6.9, 9.1], i1: [7.7, 7.7], a1: [3.2, 5], h1: [6, 8] }, ball: "rl",
-          text: "H und Innen schliessen den Durchbruch gemeinsam, A behält den Flügel in der Ecke im Blick, der zweite Innen hält den Kreis." }
+          text: "5er und 4er schliessen den Durchbruch gemeinsam, der 6er behält den Flügel in der Ecke im Blick, der 3er hält den Kreis." }
+      ] },
+    { feld: "halb", titel: "RR mit Ball, Kreis breit zwischen 2 und 1", spieler: sp60,
+      schritte: [
+        { pos: { ...corner, ...d60, k: [10, 7.3] }, ball: "rm",
+          pfeile: [{ typ: "lauf", von: "k", nach: [16.5, 5.7] }, { typ: "pass", von: "rm", nach: "rr" }],
+          text: "Der Kreis läuft breit zwischen den 2er und den 1er, RM spielt zu RR." },
+        { pos: { k: [16.5, 5.7] }, ball: "rr",
+          pfeile: [{ typ: "lauf", von: "h2", nach: [15.5, 7] }, { typ: "lauf", von: "i2", nach: [13.6, 8.4] }, { typ: "lauf", von: "i1", nach: [10.6, 7.1] }],
+          text: "Der breite Kreis wird defensiv gelöst: der 2er bleibt tief und hält ihn, der 1er bleibt beim Flügel in der Ecke. Der 3er kommt zur Unterstützung gegen RR." },
+        { pos: { h2: [15.5, 7], i2: [13.6, 8.4], i1: [10.6, 7.1] }, ball: "rr",
+          text: "RR findet keine Lücke: 3er und 2er stehen kompakt, der Kreis ist zugestellt, der 4er rückt zur Ballseite nach." }
       ] },
     { feld: "halb", titel: "Flügel läuft ein (zwei Kreisläufer)", spieler: sp60,
       schritte: [
         { pos: { ...corner, ...d60, k: [10, 7.3] }, ball: "rl",
           pfeile: [{ typ: "lauf", von: "lf", nach: [6.7, 7.4] }, { typ: "lauf", von: "a1", nach: [3.4, 5.2] }],
-          text: "LF läuft ein und wird zweiter Kreisläufer. A läuft nicht mit, sondern schiebt kompakt zu." },
+          text: "LF läuft ein und wird zweiter Kreisläufer. Der 6er läuft nicht mit, sondern schiebt kompakt zu." },
         { pos: { lf: [6.7, 7.4], a1: [3.4, 5.2] }, ball: "rl",
           pfeile: [{ typ: "lauf", von: "h1", nach: [5.6, 7.6] }, { typ: "pass", von: "rl", nach: "rm" }],
-          text: "H und Innen nehmen den zweiten Kreis zwischen sich. Variante: A bleibt in Manndeckung an RL." },
+          text: "5er und 4er nehmen den zweiten Kreis zwischen sich. Variante: der 6er bleibt in Manndeckung an RL." },
         { pos: { h1: [5.6, 7.6] }, ball: "rm",
           pfeile: [{ typ: "lauf", von: "i2", nach: [11, 8.6] }],
-          text: "Spiel gegen zwei Kreisläufer: der Innen auf der Wurfarmseite tritt gegen RM heraus, der Nachbar hält den Kreis." }
+          text: "Spiel gegen zwei Kreisläufer: der 3er auf der Wurfarmseite tritt gegen RM heraus, der 4er hält den Kreis." }
       ] }
   ];
   DEFENSES["5:1"].skizze = { feld: "halb", titel: "5:1 gegen 3:3",
