@@ -376,7 +376,7 @@ const UNIT_TEMPLATES = [
       { pos: { ...attPos, k: [10, 6.7], a1: [2.4, 4.2], h1: [5.3, 6.9], i1: [8.6, 7.1], i2: [11.4, 7.1], h2: [14.7, 6.9], a2: [17.6, 4.2] }, ball: "rm",
         pfeile: [{ typ: "pass", von: "rm", nach: "rl" }, { typ: "lauf", von: "h1", nach: [5.4, 8.6] }],
         text: "Grundstellung an der 6-m-Linie. Pass zu RL: der Halbverteidiger tritt Richtung Wurfarm heraus." },
-      { pos: { h1: [5.4, 8.6], i1: [7.6, 6.9], i2: [10.6, 7.0], h2: [13.6, 6.9], a2: [16.4, 5.4] }, ball: "rl",
+      { pos: { k: [9.1, 6.8], h1: [5.4, 8.6], i1: [7.6, 6.9], i2: [10.6, 7.0], h2: [13.6, 6.9], a2: [16.4, 5.4] }, ball: "rl",
         pfeile: [{ typ: "pass", von: "rl", nach: "lf" }, { typ: "lauf", von: "h1", nach: [4.7, 6.8] }, { typ: "lauf", von: "a1", nach: [1.9, 4.9] }],
         text: "Die Nachbarn sichern nach innen, die ganze Abwehr verschiebt zur Ballseite. Pass zu LF: Halb geht zurück, Aussen tritt heraus." },
       { pos: { h1: [4.7, 6.8], a1: [1.9, 4.9] }, ball: "lf",
